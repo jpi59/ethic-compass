@@ -1,0 +1,1 @@
+An accessible, offline magnetic compass.

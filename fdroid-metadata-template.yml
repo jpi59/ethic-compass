@@ -1,0 +1,25 @@
+# Copy to fdroiddata/metadata/org.jpi59.ethiccompass.yml only after the public
+# upstream repository and immutable v1.0.0 tag exist. Do not submit placeholders.
+Categories:
+  - Navigation
+License: GPL-3.0-or-later
+SourceCode: https://github.com/jpi59/ethic-compass
+IssueTracker: https://github.com/jpi59/ethic-compass/issues
+
+AutoName: Ethic Compass
+
+RepoType: git
+Repo: https://github.com/jpi59/ethic-compass.git
+
+Builds:
+  - versionName: 1.0.0
+    versionCode: 1
+    commit: v1.0.0
+    gradle:
+      - yes
+    output: app/build/outputs/apk/release/app-release-unsigned.apk
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[\d.]+$
+CurrentVersion: 1.0.0
+CurrentVersionCode: 1

@@ -1,0 +1,1 @@
+First release: an offline, accessibility-oriented magnetic compass.

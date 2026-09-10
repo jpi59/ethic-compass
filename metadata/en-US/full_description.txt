@@ -1,0 +1,11 @@
+Ethic Compass is an independently implemented magnetic compass designed for
+clear, accessible orientation.
+
+* Large, high-contrast heading display
+* Cardinal direction changes announced locally for accessibility services
+* Optional haptic feedback, disabled by default
+* No network or location permission
+
+It uses the phone's orientation sensors while its screen is visible. Readings
+show magnetic north and can be affected by nearby magnets or poor calibration.
+It is not a safety or navigation instrument.

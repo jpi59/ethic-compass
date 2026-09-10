@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Ethic Compass</string>
+    <string name="heading_unavailable">Orientation sensor unavailable</string>
+    <string name="heading_format">%1$d° · %2$s</string>
+    <string name="instruction">Keep the phone flat and away from magnets for a more accurate reading.</string>
+    <string name="haptics_label">Vibrate when aligned with a cardinal direction</string>
+    <string name="haptics_description">Vibration is off by default and only occurs when changing cardinal direction.</string>
+    <string name="privacy_summary">Works without network or location. It does not collect or transmit data.</string>
+    <string name="sensor_unavailable">This device does not expose a compatible orientation sensor.</string>
+    <string name="cardinal_n">North</string>
+    <string name="cardinal_ne">Northeast</string>
+    <string name="cardinal_e">East</string>
+    <string name="cardinal_se">Southeast</string>
+    <string name="cardinal_s">South</string>
+    <string name="cardinal_sw">Southwest</string>
+    <string name="cardinal_w">West</string>
+    <string name="cardinal_nw">Northwest</string>
+</resources>

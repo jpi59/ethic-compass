@@ -24,15 +24,22 @@ whether that value meets F-Droid's inclusion policy.
   Plugin from Google Maven. F-Droid must independently validate its supported
   tooling when the release is proposed.
 
-## Required before a merge request
+## Submission state
 
-1. Review `NOTICE.md`, the final application name and package ID for trademark
-   and rights conflicts. This record does not certify trademark clearance.
-2. Build, lint, inspect the release manifest and test on a physical device. A
-   compatible-sensor test is recorded in `TESTING.md`; graceful behaviour on a
+The metadata recipe is proposed in [F-Droid merge request
+!48463](https://gitlab.com/fdroid/fdroiddata/-/merge_requests/48463). It is
+open for automated checks and maintainer review; this does not certify
+acceptance or publication.
+
+## Completed preparation
+
+1. `NOTICE.md`, the application name and package ID document the known rights
+   limitation; they do not certify trademark clearance.
+2. The release was built, linted and manifest-inspected, and a compatible
+   sensor device test is recorded in `TESTING.md`. Graceful behaviour on a
    device without compatible sensors remains pending.
-3. Create and push an immutable annotated Git tag that identifies the exact source
-   revision. Do not publish a binary merely to request F-Droid inclusion.
-4. Submit a separate, reviewable `fdroiddata` merge request.
+3. The public, immutable annotated tag `v1.0.1` identifies the reviewed source
+   revision. No developer APK was published for F-Droid to consume.
+4. The separate, reviewable `fdroiddata` merge request is open.
 
 No CI pass, metadata file or local build guarantees acceptance or publication.

@@ -35,10 +35,11 @@ wrapper pins both its distribution version and SHA-256 checksum.
 
 ## F-Droid status
 
-This source tree is prepared for a future F-Droid submission but is not yet
-submitted, accepted or published. Submission requires a public upstream
-repository, an immutable release tag, a fresh independent build verification,
-and a maintainer's review.
+The metadata recipe is proposed in [F-Droid merge request
+!48463](https://gitlab.com/fdroid/fdroiddata/-/merge_requests/48463). The
+source tag and local checks are documented here, but F-Droid acceptance,
+publication and independent reproducibility remain decisions for its build and
+review process.
 
 ## License
 

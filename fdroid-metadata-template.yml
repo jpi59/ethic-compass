@@ -1,5 +1,5 @@
-# Copy to fdroiddata/metadata/org.jpi59.ethiccompass.yml only after the public
-# upstream repository and immutable v1.0.0 tag exist. Do not submit placeholders.
+# Mirrors the recipe proposed in F-Droid merge request !48463. Keep this file
+# aligned with the public source tag; do not add placeholder URLs or versions.
 Categories:
   - Navigation
 License: GPL-3.0-or-later

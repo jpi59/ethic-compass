@@ -9,9 +9,9 @@ Ethic Compass is designed to operate locally on the device.
   notification access.
 - It reads orientation sensor events only while its screen is active in order
   to calculate a magnetic heading.
-- If enabled by the person using the app, a single local preference records the
-  choice to provide haptic direction feedback. This preference remains on the
-  device and is not backed up by the app.
+- If enabled by the person using the app, local preferences record the choices
+  to provide haptic direction feedback and to use dark mode. These preferences
+  remain on the device and are not backed up by the app.
 
 The app uses magnetic north, which can be affected by local interference and
 device calibration. It is not a navigation or safety instrument and must not be

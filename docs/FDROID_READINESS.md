@@ -28,15 +28,11 @@ whether that value meets F-Droid's inclusion policy.
 
 1. Review `NOTICE.md`, the final application name and package ID for trademark
    and rights conflicts. This record does not certify trademark clearance.
-2. Create the public upstream repository from this exact source, without
-   rewriting authorship or publishing private keys.
-3. Build, lint, inspect the release manifest and test on a physical device. A
+2. Build, lint, inspect the release manifest and test on a physical device. A
    compatible-sensor test is recorded in `TESTING.md`; graceful behaviour on a
    device without compatible sensors remains pending.
-4. Create and push an immutable annotated Git tag that identifies the exact source
+3. Create and push an immutable annotated Git tag that identifies the exact source
    revision. Do not publish a binary merely to request F-Droid inclusion.
-5. Replace the placeholder URLs in `fdroid-metadata-template.yml` with the
-   actual public repository and issue tracker, then submit a separate,
-   reviewable `fdroiddata` merge request.
+4. Submit a separate, reviewable `fdroiddata` merge request.
 
 No CI pass, metadata file or local build guarantees acceptance or publication.

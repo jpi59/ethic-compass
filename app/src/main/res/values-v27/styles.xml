@@ -6,12 +6,6 @@
         <item name="android:navigationBarColor">@color/background</item>
         <item name="android:statusBarColor">@color/background</item>
         <item name="android:windowLightStatusBar">true</item>
-    </style>
-    <style name="Theme.EthicCompass.Dark" parent="android:style/Theme.Material.NoActionBar">
-        <item name="android:fontFamily">sans</item>
-        <item name="android:colorAccent">@color/primary_dark</item>
-        <item name="android:windowBackground">@color/background_dark</item>
-        <item name="android:navigationBarColor">@color/background_dark</item>
-        <item name="android:statusBarColor">@color/background_dark</item>
+        <item name="android:windowLightNavigationBar">true</item>
     </style>
 </resources>

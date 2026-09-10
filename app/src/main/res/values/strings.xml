@@ -3,10 +3,17 @@
     <string name="app_name">Ethic Compass</string>
     <string name="heading_unavailable">Orientation sensor unavailable</string>
     <string name="heading_format">%1$d° · %2$s</string>
-    <string name="instruction">Keep the phone flat and away from magnets for a more accurate reading.</string>
-    <string name="haptics_label">Vibrate when aligned with a cardinal direction</string>
+    <string name="status_summary">Magnetic north · Offline</string>
+    <string name="haptics_label">Haptic alignment</string>
     <string name="haptics_description">Vibration is off by default and only occurs when changing cardinal direction.</string>
-    <string name="privacy_summary">Works without network or location. It does not collect or transmit data.</string>
+    <string name="haptics_info_description">What is haptic alignment?</string>
+    <string name="haptics_dialog_title">Haptic alignment</string>
+    <string name="haptics_dialog_message">This optional feature gives a brief vibration when the compass moves to a different cardinal direction, such as north or east. It uses only this phone’s vibration function. No location, network, or data collection is involved.</string>
+    <string name="haptics_dialog_enable">Enable vibration</string>
+    <string name="dark_mode_label">Use dark mode</string>
+    <string name="dark_mode_description">Use a dark color theme. This preference is stored only on this device.</string>
+    <string name="details_label">Precision &amp; privacy</string>
+    <string name="details_message">Uses magnetic north. Keep the phone flat and away from magnets for a more reliable reading. Works without network or location and does not collect or transmit data.</string>
     <string name="sensor_unavailable">This device does not expose a compatible orientation sensor.</string>
     <string name="cardinal_n">North</string>
     <string name="cardinal_ne">Northeast</string>
@@ -16,4 +23,8 @@
     <string name="cardinal_sw">Southwest</string>
     <string name="cardinal_w">West</string>
     <string name="cardinal_nw">Northwest</string>
+    <string name="dial_north">N</string>
+    <string name="dial_east">E</string>
+    <string name="dial_south">S</string>
+    <string name="dial_west">W</string>
 </resources>

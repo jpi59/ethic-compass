@@ -4,7 +4,7 @@ Last reviewed: 2026-09-10
 
 ## Local release checks
 
-The following checks passed for version `1.0.0` / code `1`:
+The following checks passed for version `1.0.1` / code `2`:
 
 - `scripts/verify-privacy.sh`
 - `./gradlew clean assembleRelease lintRelease`, using Android SDK platform 36
@@ -35,6 +35,29 @@ Android API 35. It was not a Moto G35, despite the initial expectation.
   content was cut off at the bottom, then the title appeared beneath the status
   bar. Both were corrected and a final screenshot showed all content within the
   system bars.
+
+## Version 1.0.1 interface update
+
+The Moto G34 5G was updated in place with a debug build of version `1.0.1` /
+code `2`. It launched successfully from a cold start. A visual inspection
+confirmed an original canvas-drawn compass dial with a large central reading,
+a five-degree visual scale, an explicit magnetic-north label, and a long brown
+orientation pointer. This is a display scale, not a claim that every device
+sensor has five-degree physical accuracy.
+
+Both the light and dark themes were visually checked on the device. The dark
+theme changes the system bars, dial, labels, pointer, and custom checkbox while
+retaining visible contrast. Switching the explicit `Usar modo oscuro` control
+persisted only the local `dark_mode` preference; the preference was restored to
+its prior light-theme value after testing. The bright theme also showed the
+optional haptic control and the dark-theme control without clipping.
+
+The same device was then forced temporarily into landscape orientation for a
+reversible test; its original autorotation settings were restored immediately
+after the capture. Landscape uses a dedicated two-panel layout: heading,
+offline status, haptic control, dark-theme control, and details are in the left
+panel, while the complete compass remains visible in the right panel. No
+clipping was observed.
 
 ## Limits and pending checks
 

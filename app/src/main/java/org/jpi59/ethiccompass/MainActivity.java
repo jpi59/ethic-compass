@@ -5,10 +5,10 @@
 package org.jpi59.ethiccompass;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Insets;
-import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -22,6 +22,7 @@ import android.view.HapticFeedbackConstants;
 import android.view.Surface;
 import android.view.View;
 import android.view.WindowInsets;
+import android.view.Window;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -31,6 +32,7 @@ import android.widget.TextView;
 public final class MainActivity extends Activity implements SensorEventListener {
     private static final String PREFERENCES = "settings";
     private static final String HAPTICS_ENABLED = "haptics_enabled";
+    private static final String DARK_MODE = "dark_mode";
 
     private SensorManager sensorManager;
     private Sensor rotationVectorSensor;
@@ -43,6 +45,7 @@ public final class MainActivity extends Activity implements SensorEventListener 
     private TextView statusText;
     private CompassView compassView;
     private boolean hapticsEnabled;
+    private boolean darkMode;
     private String lastAnnouncedCardinal;
     private String lastHapticCardinal;
 
@@ -51,12 +54,16 @@ public final class MainActivity extends Activity implements SensorEventListener 
         super.onCreate(savedInstanceState);
         hapticsEnabled = getSharedPreferences(PREFERENCES, MODE_PRIVATE)
                 .getBoolean(HAPTICS_ENABLED, false);
+        darkMode = getSharedPreferences(PREFERENCES, MODE_PRIVATE)
+                .getBoolean(DARK_MODE, false);
+        setTheme(darkMode ? R.style.Theme_EthicCompass_Dark : R.style.Theme_EthicCompass);
 
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         rotationVectorSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
         setContentView(createContent());
+        applySystemBars();
 
         if (rotationVectorSensor == null && (accelerometer == null || magnetometer == null)) {
             showSensorUnavailable();
@@ -64,10 +71,18 @@ public final class MainActivity extends Activity implements SensorEventListener 
     }
 
     private View createContent() {
-        int padding = dp(20);
+        if (getResources().getConfiguration().orientation
+                == android.content.res.Configuration.ORIENTATION_LANDSCAPE) {
+            return createLandscapeContent();
+        }
+        return createPortraitContent();
+    }
+
+    private View createPortraitContent() {
+        int padding = dp(6);
         ScrollView scrollView = new ScrollView(this);
         scrollView.setFillViewport(true);
-        scrollView.setBackgroundColor(getColor(R.color.background));
+        scrollView.setBackgroundColor(color(R.color.background, R.color.background_dark));
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setGravity(Gravity.CENTER_HORIZONTAL);
@@ -84,55 +99,124 @@ public final class MainActivity extends Activity implements SensorEventListener 
             scrollView.setFitsSystemWindows(true);
         }
 
-        headingText = textView(32, true);
-        headingText.setGravity(Gravity.CENTER);
-        headingText.setTextColor(getColor(R.color.on_background));
-        root.addView(headingText, new LinearLayout.LayoutParams(
+        TextView title = textView(30, true);
+        title.setText(R.string.app_name);
+        title.setGravity(Gravity.CENTER);
+        title.setTextColor(color(R.color.on_background, R.color.on_background_dark));
+        root.addView(title, new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
 
-        cardinalText = textView(20, true);
-        cardinalText.setGravity(Gravity.CENTER);
-        cardinalText.setTextColor(getColor(R.color.primary));
+        // The live reading is drawn in the dial. These views retain a concise
+        // accessibility description without duplicating the visual reading.
+        headingText = textView(1, false);
+        cardinalText = textView(1, false);
         cardinalText.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
-        root.addView(cardinalText, new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
 
         compassView = new CompassView(this);
-        compassView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+        compassView.setDarkMode(darkMode);
+        compassView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
         root.addView(compassView, new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, dp(260)));
+                LinearLayout.LayoutParams.MATCH_PARENT, dp(370)));
 
         statusText = textView(18, false);
-        statusText.setTextColor(getColor(R.color.muted));
+        statusText.setTextColor(color(R.color.muted, R.color.muted_dark));
         statusText.setGravity(Gravity.CENTER);
-        statusText.setText(getString(R.string.instruction));
+        statusText.setText(getString(R.string.status_summary));
+        statusText.setPadding(0, dp(4), 0, 0);
         root.addView(statusText, new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
 
-        CheckBox haptics = new CheckBox(this);
-        haptics.setText(getString(R.string.haptics_label));
-        haptics.setTextColor(getColor(R.color.on_background));
-        haptics.setTextSize(18);
-        haptics.setPadding(0, dp(12), 0, 0);
-        haptics.setChecked(hapticsEnabled);
-        haptics.setContentDescription(getString(R.string.haptics_description));
-        haptics.setOnCheckedChangeListener((button, checked) -> {
-            hapticsEnabled = checked;
-            getSharedPreferences(PREFERENCES, MODE_PRIVATE).edit()
-                    .putBoolean(HAPTICS_ENABLED, checked).apply();
-            lastHapticCardinal = null;
-        });
-        root.addView(haptics, new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+        root.addView(createHapticsControl(17), new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+        root.addView(createDarkModeControl(17), new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
 
-        TextView privacy = textView(15, false);
-        privacy.setTextColor(getColor(R.color.muted));
-        privacy.setGravity(Gravity.CENTER);
-        privacy.setPadding(0, dp(8), 0, 0);
-        privacy.setText(getString(R.string.privacy_summary));
-        root.addView(privacy, new LinearLayout.LayoutParams(
+        TextView details = textView(16, true);
+        details.setTextColor(color(R.color.primary, R.color.primary_dark));
+        details.setGravity(Gravity.CENTER);
+        details.setPadding(0, dp(4), 0, 0);
+        details.setText(getString(R.string.details_label));
+        details.setClickable(true);
+        details.setFocusable(true);
+        details.setOnClickListener(view -> new AlertDialog.Builder(this)
+                .setTitle(R.string.details_label)
+                .setMessage(R.string.details_message)
+                .setPositiveButton(android.R.string.ok, null)
+                .show());
+        root.addView(details, new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
         return scrollView;
+    }
+
+    private View createLandscapeContent() {
+        int padding = dp(14);
+        LinearLayout root = new LinearLayout(this);
+        root.setOrientation(LinearLayout.HORIZONTAL);
+        root.setGravity(Gravity.CENTER_VERTICAL);
+        root.setPadding(padding, padding, padding, padding);
+        root.setBackgroundColor(color(R.color.background, R.color.background_dark));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            root.setOnApplyWindowInsetsListener((view, insets) -> {
+                Insets bars = insets.getInsets(WindowInsets.Type.systemBars());
+                root.setPadding(padding + bars.left, padding + bars.top,
+                        padding + bars.right, padding + bars.bottom);
+                return insets;
+            });
+        } else {
+            root.setFitsSystemWindows(true);
+        }
+
+        LinearLayout controls = new LinearLayout(this);
+        controls.setOrientation(LinearLayout.VERTICAL);
+        controls.setGravity(Gravity.CENTER_HORIZONTAL);
+        root.addView(controls, new LinearLayout.LayoutParams(
+                0, LinearLayout.LayoutParams.MATCH_PARENT, 0.42f));
+
+        TextView title = textView(24, true);
+        title.setText(R.string.app_name);
+        title.setGravity(Gravity.CENTER);
+        title.setTextColor(color(R.color.on_background, R.color.on_background_dark));
+        controls.addView(title, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+
+        headingText = textView(1, false);
+        cardinalText = textView(1, false);
+        cardinalText.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
+
+        statusText = textView(16, false);
+        statusText.setTextColor(color(R.color.muted, R.color.muted_dark));
+        statusText.setGravity(Gravity.CENTER);
+        statusText.setPadding(0, dp(16), 0, 0);
+        statusText.setText(getString(R.string.status_summary));
+        controls.addView(statusText, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+
+        controls.addView(createHapticsControl(16), new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+        controls.addView(createDarkModeControl(16), new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+
+        TextView details = textView(16, true);
+        details.setTextColor(color(R.color.primary, R.color.primary_dark));
+        details.setGravity(Gravity.CENTER);
+        details.setPadding(0, dp(4), 0, 0);
+        details.setText(getString(R.string.details_label));
+        details.setClickable(true);
+        details.setFocusable(true);
+        details.setOnClickListener(view -> new AlertDialog.Builder(this)
+                .setTitle(R.string.details_label)
+                .setMessage(R.string.details_message)
+                .setPositiveButton(android.R.string.ok, null)
+                .show());
+        controls.addView(details, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+
+        compassView = new CompassView(this);
+        compassView.setDarkMode(darkMode);
+        compassView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
+        root.addView(compassView, new LinearLayout.LayoutParams(
+                0, LinearLayout.LayoutParams.MATCH_PARENT, 0.58f));
+        return root;
     }
 
     private TextView textView(int sizeSp, boolean important) {
@@ -141,6 +225,112 @@ public final class MainActivity extends Activity implements SensorEventListener 
         view.setImportantForAccessibility(important
                 ? View.IMPORTANT_FOR_ACCESSIBILITY_YES : View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
         return view;
+    }
+
+    private View createHapticsControl(int textSizeSp) {
+        LinearLayout row = new LinearLayout(this);
+        row.setGravity(Gravity.CENTER_VERTICAL);
+        row.setPadding(0, dp(6), 0, 0);
+
+        CheckBox haptics = new CheckBox(this);
+        haptics.setText(getString(R.string.haptics_label));
+        haptics.setTextColor(color(R.color.on_background, R.color.on_background_dark));
+        haptics.setTextSize(textSizeSp);
+        haptics.setGravity(Gravity.CENTER_VERTICAL);
+        haptics.setButtonTintList(null);
+        haptics.setButtonDrawable(darkMode
+                ? R.drawable.haptic_checkbox_dark : R.drawable.haptic_checkbox);
+        haptics.setChecked(hapticsEnabled);
+        haptics.setContentDescription(getString(R.string.haptics_description));
+        haptics.setOnCheckedChangeListener((button, checked) -> {
+            if (checked) {
+                showHapticsDialog(haptics);
+            } else {
+                setHapticsEnabled(false);
+            }
+        });
+        row.addView(haptics, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+
+        TextView info = textView(24, true);
+        info.setText("ⓘ");
+        info.setTextColor(color(R.color.primary, R.color.primary_dark));
+        info.setGravity(Gravity.CENTER);
+        info.setPadding(dp(8), 0, 0, 0);
+        info.setClickable(true);
+        info.setFocusable(true);
+        info.setContentDescription(getString(R.string.haptics_info_description));
+        info.setOnClickListener(view -> showHapticsDialog(null));
+        row.addView(info, new LinearLayout.LayoutParams(dp(40), dp(40)));
+        return row;
+    }
+
+    private View createDarkModeControl(int textSizeSp) {
+        CheckBox darkModeControl = new CheckBox(this);
+        darkModeControl.setText(getString(R.string.dark_mode_label));
+        darkModeControl.setTextColor(color(R.color.on_background, R.color.on_background_dark));
+        darkModeControl.setTextSize(textSizeSp);
+        darkModeControl.setGravity(Gravity.CENTER_VERTICAL);
+        darkModeControl.setPadding(0, dp(2), 0, 0);
+        darkModeControl.setButtonTintList(null);
+        darkModeControl.setButtonDrawable(darkMode
+                ? R.drawable.haptic_checkbox_dark : R.drawable.haptic_checkbox);
+        darkModeControl.setChecked(darkMode);
+        darkModeControl.setContentDescription(getString(R.string.dark_mode_description));
+        darkModeControl.setOnCheckedChangeListener((button, checked) -> setDarkMode(checked));
+        return darkModeControl;
+    }
+
+    private void showHapticsDialog(CheckBox haptics) {
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this)
+                .setTitle(R.string.haptics_dialog_title)
+                .setMessage(R.string.haptics_dialog_message)
+                .setNegativeButton(android.R.string.cancel, (ignored, which) -> {
+                    if (haptics != null) {
+                        haptics.setChecked(false);
+                    }
+                });
+        if (haptics != null) {
+            dialog.setPositiveButton(R.string.haptics_dialog_enable, (ignored, which) ->
+                    setHapticsEnabled(true));
+        } else {
+            dialog.setPositiveButton(android.R.string.ok, null);
+        }
+        dialog.show();
+    }
+
+    private void setHapticsEnabled(boolean enabled) {
+        hapticsEnabled = enabled;
+        getSharedPreferences(PREFERENCES, MODE_PRIVATE).edit()
+                .putBoolean(HAPTICS_ENABLED, enabled).apply();
+        lastHapticCardinal = null;
+    }
+
+    private void setDarkMode(boolean enabled) {
+        if (darkMode == enabled) {
+            return;
+        }
+        getSharedPreferences(PREFERENCES, MODE_PRIVATE).edit()
+                .putBoolean(DARK_MODE, enabled).apply();
+        recreate();
+    }
+
+    private int color(int lightColor, int darkColor) {
+        return getColor(darkMode ? darkColor : lightColor);
+    }
+
+    private void applySystemBars() {
+        Window window = getWindow();
+        int background = color(R.color.background, R.color.background_dark);
+        window.setStatusBarColor(background);
+        window.setNavigationBarColor(background);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            int flags = darkMode ? 0 : View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !darkMode) {
+                flags |= View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+            }
+            window.getDecorView().setSystemUiVisibility(flags);
+        }
     }
 
     @Override
@@ -220,6 +410,7 @@ public final class MainActivity extends Activity implements SensorEventListener 
         headingText.setText(text);
         headingText.setContentDescription(text);
         compassView.setHeading(degrees, cardinal);
+        compassView.setContentDescription(text);
         if (!cardinal.equals(lastAnnouncedCardinal)) {
             cardinalText.setText(cardinal);
             lastAnnouncedCardinal = cardinal;

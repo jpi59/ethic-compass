@@ -1,9 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="background">#101418</color>
-    <color name="surface">#172027</color>
-    <color name="primary">#70E1FF</color>
-    <color name="on_background">#F4F7FA</color>
-    <color name="muted">#C5D0D9</color>
-    <color name="north">#FFB4AB</color>
+    <color name="background">#FAFCFD</color>
+    <color name="surface">#F0F5F7</color>
+    <color name="primary">#006B85</color>
+    <color name="on_background">#172A33</color>
+    <color name="muted">#43535C</color>
+    <color name="compass_ring">#9BAEB5</color>
+    <color name="north">#6B4226</color>
+    <color name="background_dark">#10181C</color>
+    <color name="surface_dark">#17252B</color>
+    <color name="primary_dark">#57C7E3</color>
+    <color name="on_background_dark">#EFF5F6</color>
+    <color name="muted_dark">#AAB9BD</color>
+    <color name="compass_ring_dark">#667E86</color>
+    <color name="north_dark">#D9A474</color>
 </resources>

@@ -1,0 +1,1 @@
+Refined the interface with a larger, original compass dial, optional dark mode, and a dedicated landscape layout.

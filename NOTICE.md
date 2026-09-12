@@ -7,6 +7,11 @@ Ethic Compass in 2026 by jpi59. No code, translations, icons, screenshots or
 marketing copy from `Kr0oked/Compass` or another compass application has been
 copied into this project.
 
+Unless a file carries a different retained notice, those original contributions
+are offered under the GNU General Public License, version 3 or (at the
+recipient's option) any later version. The complete GPLv3 text is in
+`LICENSE`; the explicit “or later” grant is the project licence declaration.
+
 The decision to make Ethic Compass an independent implementation followed a
 review on 2026-09-10 showing that `com.bobek.compass` is an actively maintained
 application already available in F-Droid. Ethic Compass must therefore retain

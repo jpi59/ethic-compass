@@ -12,6 +12,12 @@
     <string name="haptics_dialog_enable">Enable vibration</string>
     <string name="dark_mode_label">Use dark mode</string>
     <string name="dark_mode_description">Use a dark color theme. This preference is stored only on this device.</string>
+    <string name="language_value_format">Language: %1$s</string>
+    <string name="language_description">Choose the display language. This preference is stored only on this device.</string>
+    <string name="language_dialog_title">Display language</string>
+    <string name="language_spanish">Español</string>
+    <string name="language_english">English</string>
+    <string name="language_system">Follow device language</string>
     <string name="details_label">Precision &amp; privacy</string>
     <string name="details_message">Uses magnetic north. Keep the phone flat and away from magnets for a more reliable reading. Works without network or location and does not collect or transmit data.</string>
     <string name="sensor_unavailable">This device does not expose a compatible orientation sensor.</string>

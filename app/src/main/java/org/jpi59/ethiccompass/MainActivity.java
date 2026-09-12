@@ -8,7 +8,9 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.graphics.Insets;
+import android.graphics.Typeface;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -28,11 +30,15 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import java.util.Locale;
+
 /** Displays a magnetic heading only. It never requests location or network access. */
 public final class MainActivity extends Activity implements SensorEventListener {
     private static final String PREFERENCES = "settings";
     private static final String HAPTICS_ENABLED = "haptics_enabled";
     private static final String DARK_MODE = "dark_mode";
+    private static final String DISPLAY_LANGUAGE = "display_language";
+    private static final String SYSTEM_LANGUAGE = "system";
 
     private SensorManager sensorManager;
     private Sensor rotationVectorSensor;
@@ -46,16 +52,22 @@ public final class MainActivity extends Activity implements SensorEventListener 
     private CompassView compassView;
     private boolean hapticsEnabled;
     private boolean darkMode;
+    private String displayLanguage;
     private String lastAnnouncedCardinal;
     private String lastHapticCardinal;
 
     @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(localizedContext(newBase));
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        hapticsEnabled = getSharedPreferences(PREFERENCES, MODE_PRIVATE)
-                .getBoolean(HAPTICS_ENABLED, false);
-        darkMode = getSharedPreferences(PREFERENCES, MODE_PRIVATE)
-                .getBoolean(DARK_MODE, false);
+        SharedPreferences preferences = getSharedPreferences(PREFERENCES, MODE_PRIVATE);
+        hapticsEnabled = preferences.getBoolean(HAPTICS_ENABLED, false);
+        darkMode = preferences.getBoolean(DARK_MODE, false);
+        displayLanguage = preferences.getString(DISPLAY_LANGUAGE, SYSTEM_LANGUAGE);
         setTheme(darkMode ? R.style.Theme_EthicCompass_Dark : R.style.Theme_EthicCompass);
 
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -130,11 +142,15 @@ public final class MainActivity extends Activity implements SensorEventListener 
                 LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
         root.addView(createDarkModeControl(17), new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+        root.addView(createLanguageControl(17), new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
 
         TextView details = textView(16, true);
+        medium(details);
         details.setTextColor(color(R.color.primary, R.color.primary_dark));
         details.setGravity(Gravity.CENTER);
-        details.setPadding(0, dp(4), 0, 0);
+        details.setMinHeight(dp(48));
+        details.setPadding(dp(12), dp(8), dp(12), dp(8));
         details.setText(getString(R.string.details_label));
         details.setClickable(true);
         details.setFocusable(true);
@@ -195,11 +211,15 @@ public final class MainActivity extends Activity implements SensorEventListener 
                 LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
         controls.addView(createDarkModeControl(16), new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+        controls.addView(createLanguageControl(16), new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
 
         TextView details = textView(16, true);
+        medium(details);
         details.setTextColor(color(R.color.primary, R.color.primary_dark));
         details.setGravity(Gravity.CENTER);
-        details.setPadding(0, dp(4), 0, 0);
+        details.setMinHeight(dp(48));
+        details.setPadding(dp(12), dp(8), dp(12), dp(8));
         details.setText(getString(R.string.details_label));
         details.setClickable(true);
         details.setFocusable(true);
@@ -222,9 +242,15 @@ public final class MainActivity extends Activity implements SensorEventListener 
     private TextView textView(int sizeSp, boolean important) {
         TextView view = new TextView(this);
         view.setTextSize(sizeSp);
+        view.setTypeface(Typeface.create("sans-serif", Typeface.NORMAL));
+        view.setIncludeFontPadding(false);
         view.setImportantForAccessibility(important
                 ? View.IMPORTANT_FOR_ACCESSIBILITY_YES : View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
         return view;
+    }
+
+    private void medium(TextView view) {
+        view.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
     }
 
     private View createHapticsControl(int textSizeSp) {
@@ -253,6 +279,7 @@ public final class MainActivity extends Activity implements SensorEventListener 
                 LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
 
         TextView info = textView(24, true);
+        medium(info);
         info.setText("ⓘ");
         info.setTextColor(color(R.color.primary, R.color.primary_dark));
         info.setGravity(Gravity.CENTER);
@@ -261,7 +288,7 @@ public final class MainActivity extends Activity implements SensorEventListener 
         info.setFocusable(true);
         info.setContentDescription(getString(R.string.haptics_info_description));
         info.setOnClickListener(view -> showHapticsDialog(null));
-        row.addView(info, new LinearLayout.LayoutParams(dp(40), dp(40)));
+        row.addView(info, new LinearLayout.LayoutParams(dp(48), dp(48)));
         return row;
     }
 
@@ -279,6 +306,38 @@ public final class MainActivity extends Activity implements SensorEventListener 
         darkModeControl.setContentDescription(getString(R.string.dark_mode_description));
         darkModeControl.setOnCheckedChangeListener((button, checked) -> setDarkMode(checked));
         return darkModeControl;
+    }
+
+    private View createLanguageControl(int textSizeSp) {
+        TextView language = textView(textSizeSp, true);
+        medium(language);
+        language.setText(getString(R.string.language_value_format,
+                getString(languageNameResource())));
+        language.setTextColor(color(R.color.primary, R.color.primary_dark));
+        language.setGravity(Gravity.CENTER);
+        language.setMinHeight(dp(48));
+        language.setPadding(dp(12), dp(8), dp(12), dp(8));
+        language.setClickable(true);
+        language.setFocusable(true);
+        language.setContentDescription(getString(R.string.language_description));
+        language.setOnClickListener(view -> showLanguageDialog());
+        return language;
+    }
+
+    private void showLanguageDialog() {
+        CharSequence[] languages = {
+                getString(R.string.language_spanish), getString(R.string.language_english),
+                getString(R.string.language_system)
+        };
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.language_dialog_title)
+                .setSingleChoiceItems(languages, languageSelectionIndex(),
+                        (dialog, which) -> {
+                            setDisplayLanguage(which == 0 ? "es" : which == 1 ? "en" : SYSTEM_LANGUAGE);
+                            dialog.dismiss();
+                        })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
     }
 
     private void showHapticsDialog(CheckBox haptics) {
@@ -313,6 +372,46 @@ public final class MainActivity extends Activity implements SensorEventListener 
         getSharedPreferences(PREFERENCES, MODE_PRIVATE).edit()
                 .putBoolean(DARK_MODE, enabled).apply();
         recreate();
+    }
+
+    private void setDisplayLanguage(String language) {
+        SharedPreferences preferences = getSharedPreferences(PREFERENCES, MODE_PRIVATE);
+        if (language.equals(preferences.getString(DISPLAY_LANGUAGE, null))) {
+            return;
+        }
+        preferences.edit().putString(DISPLAY_LANGUAGE, language).apply();
+        recreate();
+    }
+
+    private static Context localizedContext(Context base) {
+        String language = base.getSharedPreferences(PREFERENCES, MODE_PRIVATE)
+                .getString(DISPLAY_LANGUAGE, null);
+        if (!"es".equals(language) && !"en".equals(language)) {
+            return base;
+        }
+        Configuration configuration = new Configuration(base.getResources().getConfiguration());
+        configuration.setLocale(Locale.forLanguageTag(language));
+        return base.createConfigurationContext(configuration);
+    }
+
+    private int languageNameResource() {
+        if ("es".equals(displayLanguage)) {
+            return R.string.language_spanish;
+        }
+        if ("en".equals(displayLanguage)) {
+            return R.string.language_english;
+        }
+        return R.string.language_system;
+    }
+
+    private int languageSelectionIndex() {
+        if ("es".equals(displayLanguage)) {
+            return 0;
+        }
+        if ("en".equals(displayLanguage)) {
+            return 1;
+        }
+        return 2;
     }
 
     private int color(int lightColor, int darkColor) {

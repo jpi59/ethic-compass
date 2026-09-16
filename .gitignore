@@ -4,3 +4,10 @@ app/build/
 local.properties
 *.apk
 *.aab
+keystore.properties
+key.properties
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.pem

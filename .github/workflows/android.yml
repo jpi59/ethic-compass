@@ -1,0 +1,28 @@
+name: Android verification
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+
+# The workflow only needs to read the repository. It does not use signing
+# material, publish artifacts, or receive any write-capable token.
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+      - run: ./gradlew --no-daemon :app:testDebugUnitTest :app:assembleRelease :app:lintVitalRelease
